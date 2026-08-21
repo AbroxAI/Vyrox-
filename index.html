@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0A0E17" />
+    <title>Vyrox – Dashboard</title>
+
+    <!-- Telegram Mini App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet"
+    />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-primary: #0A0E17;
+            --bg-card: #111927;
+            --bg-card-hover: #1A2335;
+            --text-primary: #CCDDEE;
+            --text-secondary: #8899BB;
+            --cyan: #00FFFF;
+            --neon-green: #39FF14;
+            --red: #FF3333;
+            --yellow: #FFB800;
+            --border-color: #1A2A3A;
+            --shadow: 0 0 20px rgba(0, 255, 255, 0.05);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+            --telegram-blue: #0088cc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            width: 100%;
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-placeholder {
+            width: 56px;
+            height: 56px;
+            background: #000;
+            border: 1px solid rgba(0, 255, 255, 0.35);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+            transition: var(--transition);
+        }
+
+        .logo-placeholder img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+        .logo-placeholder:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
+        }
+
+        .brand-text h1 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+        }
+
+        .brand-text span {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--neon-green);
+        }
+
+        .status .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--neon-green);
+            animation: pulse 1.5s infinite;
+        }
+
+        .status.offline {
+            color: var(--red);
+        }
+
+        .status.offline .dot {
+            background: var(--red);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .timestamp,
+        .auto-refresh {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .metric-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .metric-label svg {
+            width: 18px;
+            height: 18px;
+            color: var(--cyan);
+            flex-shrink: 0;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-value.green {
+            color: var(--neon-green);
+        }
+
+        .metric-value.red {
+            color: var(--red);
+        }
+
+        .metric-value.cyan {
+            color: var(--cyan);
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--cyan);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .card-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header h3 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--cyan);
+            flex-shrink: 0;
+        }
+
+        .position-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .position-item {
+            background: var(--bg-primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .position-item .label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .position-item .value {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .position-item .value.green {
+            color: var(--neon-green);
+        }
+
+        .position-item .value.red {
+            color: var(--red);
+        }
+
+        .regime-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            background: var(--bg-primary);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+        }
+
+        .regime-badge.trend {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        .regime-badge.range {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .regime-badge.volatile {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .regime-history {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .regime-history .arrow {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .regime-history .tag {
+            font-size: 11px;
+            padding: 2px 12px;
+            border-radius: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .regime-history .tag.active {
+            border-color: var(--cyan);
+            color: var(--cyan);
+            font-weight: 600;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .profit {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        .loss {
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .table-actions button {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .table-actions button:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .breaker-item {
+            margin-bottom: 12px;
+        }
+
+        .breaker-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .breaker-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 4px;
+            gap: 12px;
+        }
+
+        .breaker-label .limit {
+            color: var(--text-secondary);
+        }
+
+        .breaker-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .breaker-bar .fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        .breaker-bar .fill.green {
+            background: var(--neon-green);
+        }
+
+        .breaker-bar .fill.cyan {
+            background: var(--cyan);
+        }
+
+        .breaker-bar .fill.red {
+            background: var(--red);
+        }
+
+        .breaker-bar .fill.yellow {
+            background: var(--yellow);
+        }
+
+        .alert-box {
+            background: var(--bg-primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .alert-box .icon {
+            color: var(--telegram-blue);
+            font-size: 20px;
+        }
+
+        .alert-box .msg {
+            flex: 1;
+            color: var(--text-primary);
+            min-width: 180px;
+        }
+
+        .alert-box .time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .telegram-badge {
+            display: inline-block;
+            background: var(--telegram-blue);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .log-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .log-item .log-icon {
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .log-item .log-time {
+            color: var(--text-secondary);
+            font-size: 11px;
+            min-width: 60px;
+        }
+
+        .log-item .log-msg {
+            flex: 1;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--cyan);
+            color: var(--bg-primary);
+            border-color: var(--cyan);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-danger {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .btn-danger:hover {
+            background: var(--red);
+            color: var(--bg-primary);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.2);
+        }
+
+        .btn-success {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        .btn-success:hover {
+            background: var(--neon-green);
+            color: var(--bg-primary);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+        }
+
+        .btn-telegram {
+            background: var(--telegram-blue);
+            color: #fff;
+            border-color: var(--telegram-blue);
+        }
+
+        .btn-telegram:hover {
+            background: #0066aa;
+            border-color: #0066aa;
+            box-shadow: 0 0 20px rgba(0, 136, 204, 0.3);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 20px 10px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .position-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .dashboard {
+                padding: 16px;
+            }
+
+            .brand-text h1 {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .position-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cyan);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+
+        <header class="header">
+            <div class="brand">
+                <div class="logo-placeholder" id="logoPlaceholder">
+                    <img
+                        src="assets/vyrox.png"
+                        alt="Vyrox Logo"
+                    />
+                </div>
+
+                <div class="brand-text">
+                    <h1>VYROX</h1>
+                    <span>Adaptive Algorithmic Trading</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="status" id="connectionStatus">
+                    <span class="dot"></span>
+                    <span id="statusText">CONNECTING</span>
+                </div>
+
+                <div
+                    class="timestamp"
+                    id="lastUpdate"
+                >
+                    Last Update: —
+                </div>
+
+                <div class="auto-refresh">
+                    <i data-lucide="clock"></i>
+                    Auto-refresh: 2s
+                </div>
+            </div>
+        </header>
+
+        <!-- METRICS -->
+        <section class="metrics-grid">
+
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i data-lucide="wallet"></i>
+                    Balance
+                </div>
+
+                <div
+                    class="metric-value cyan"
+                    id="balance"
+                >
+                    —
+                </div>
+
+                <div class="metric-sub">
+                    <span id="balanceChange">—</span>
+                    <span id="balanceTradeCount">
+                        Trades: —
+                    </span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i data-lucide="trending-up"></i>
+                    Today
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="todayPnl"
+                >
+                    —
+                </div>
+
+                <div class="metric-sub">
+                    <span id="todayPnlPercent">—</span>
+                    <span id="todayTradeCount">
+                        Trades: —
+                    </span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i data-lucide="bar-chart-3"></i>
+                    Total
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="totalPnl"
+                >
+                    —
+                </div>
+
+                <div class="metric-sub">
+                    <span id="totalPnlPercent">—</span>
+                    <span id="totalTradeCount">
+                        Trades: —
+                    </span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i data-lucide="target"></i>
+                    Win Rate
+                </div>
+
+                <div
+                    class="metric-value cyan"
+                    id="winRate"
+                >
+                    —
+                </div>
+
+                <div
+                    class="metric-sub"
+                    id="rewardRisk"
+                >
+                    Reward / Risk: —
+                </div>
+            </div>
+
+        </section>
+
+        <!-- CURRENT POSITION -->
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>
+                    <i data-lucide="flame"></i>
+                    Current Position
+                </h3>
+
+                <span
+                    id="positionStatus"
+                    style="font-size:12px;color:var(--text-secondary);"
+                >
+                    Loading...
+                </span>
+
+            </div>
+
+            <div
+                class="position-grid"
+                id="positionGrid"
+            >
+
+                <div class="position-item">
+                    <div class="label">Type</div>
+                    <div
+                        class="value"
+                        id="posType"
+                    >
+                        —
+                    </div>
+                </div>
+
+                <div class="position-item">
+                    <div class="label">Entry</div>
+                    <div
+                        class="value"
+                        id="posEntry"
+                    >
+                        —
+                    </div>
+                </div>
+
+                <div class="position-item">
+                    <div class="label">Current</div>
+                    <div
+                        class="value"
+                        id="posCurrent"
+                    >
+                        —
+                    </div>
+                </div>
+
+                <div class="position-item">
+                    <div class="label">PnL</div>
+                    <div
+                        class="value"
+                        id="posPnl"
+                    >
+                        —
+                    </div>
+                </div>
+
+                <div class="position-item">
+                    <div class="label">Stop Loss</div>
+                    <div
+                        class="value"
+                        id="posSl"
+                    >
+                        —
+                    </div>
+                </div>
+
+                <div class="position-item">
+                    <div class="label">Take Profit</div>
+                    <div
+                        class="value"
+                        id="posTp"
+                    >
+                        —
+                    </div>
+                </div>
+
+                <div class="position-item">
+                    <div class="label">Duration</div>
+                    <div
+                        class="value"
+                        id="posDuration"
+                    >
+                        —
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- MARKET REGIME -->
+        <div class="card">
+
+            <div class="card-header">
+                <h3>
+                    <i data-lucide="brain"></i>
+                    Market Regime
+                </h3>
+            </div>
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    gap:16px;
+                    flex-wrap:wrap;
+                "
+            >
+
+                <span
+                    class="regime-badge"
+                    id="regimeBadge"
+                >
+                    UNKNOWN
+                </span>
+
+                <span
+                    style="
+                        font-size:13px;
+                        color:var(--text-secondary);
+                    "
+                >
+                    ADX:
+                    <span
+                        id="regimeAdx"
+                        style="
+                            color:var(--text-primary);
+                            font-weight:600;
+                        "
+                    >
+                        —
+                    </span>
+                </span>
+
+                <span
+                    style="
+                        font-size:13px;
+                        color:var(--text-secondary);
+                    "
+                >
+                    Confidence:
+                    <span
+                        id="regimeConfidence"
+                        style="
+                            color:var(--cyan);
+                            font-weight:600;
+                        "
+                    >
+                        —
+                    </span>
+                </span>
+
+                <span
+                    style="
+                        font-size:13px;
+                        color:var(--text-secondary);
+                    "
+                >
+                    Signal:
+                    <span
+                        id="regimeSignal"
+                        style="
+                            color:var(--text-primary);
+                            font-weight:600;
+                        "
+                    >
+                        —
+                    </span>
+                </span>
+
+            </div>
+
+            <div
+                class="regime-history"
+                id="regimeHistory"
+            >
+                <span class="empty-state">
+                    Waiting for regime history...
+                </span>
+            </div>
+
+        </div>
+
+        <!-- TRADE HISTORY -->
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>
+                    <i data-lucide="list"></i>
+                    Trade History
+                </h3>
+
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Entry</th>
+                            <th>Exit</th>
+                            <th>PnL</th>
+                        </tr>
+                    </thead>
+
+                    <tbody
+                        id="tradeHistoryBody"
+                    >
+                        <tr>
+                            <td
+                                colspan="5"
+                                class="empty-state"
+                            >
+                                Waiting for trade data...
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="table-actions">
+
+                <button
+                    id="viewAllBtn"
+                    type="button"
+                >
+                    View All
+                </button>
+
+                <button
+                    id="exportCsvBtn"
+                    type="button"
+                >
+                    Export CSV
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- CIRCUIT BREAKERS -->
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>
+                    <i data-lucide="shield"></i>
+                    Circuit Breakers
+                </h3>
+
+            </div>
+
+            <div class="breaker-item">
+
+                <div class="breaker-label">
+
+                    <span>Daily Loss</span>
+
+                    <span>
+                        <span id="dailyLossValue">—</span>
+                        <span class="limit">
+                            (Limit: —)
+                        </span>
+                    </span>
+
+                </div>
+
+                <div class="breaker-bar">
+                    <div
+                        class="fill green"
+                        id="dailyLossBar"
+                        style="width:0%;"
+                    ></div>
+                </div>
+
+            </div>
+
+            <div class="breaker-item">
+
+                <div class="breaker-label">
+
+                    <span>Daily Profit</span>
+
+                    <span>
+                        <span id="dailyProfitValue">—</span>
+                        <span class="limit">
+                            (Target: —)
+                        </span>
+                    </span>
+
+                </div>
+
+                <div class="breaker-bar">
+                    <div
+                        class="fill cyan"
+                        id="dailyProfitBar"
+                        style="width:0%;"
+                    ></div>
+                </div>
+
+            </div>
+
+            <div class="breaker-item">
+
+                <div class="breaker-label">
+
+                    <span>Drawdown</span>
+
+                    <span>
+                        <span id="drawdownValue">—</span>
+                        <span class="limit">
+                            (Limit: —)
+                        </span>
+                    </span>
+
+                </div>
+
+                <div class="breaker-bar">
+                    <div
+                        class="fill yellow"
+                        id="drawdownBar"
+                        style="width:0%;"
+                    ></div>
+                </div>
+
+            </div>
+
+            <div class="breaker-item">
+
+                <div class="breaker-label">
+
+                    <span>
+                        Consecutive Losses
+                    </span>
+
+                    <span>
+                        <span id="consecutiveLosses">
+                            —
+                        </span>
+
+                        <span class="limit">
+                            / —
+                        </span>
+                    </span>
+
+                </div>
+
+                <div class="breaker-bar">
+                    <div
+                        class="fill green"
+                        id="consecutiveBar"
+                        style="width:0%;"
+                    ></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- TELEGRAM -->
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>
+                    <i data-lucide="send"></i>
+                    Telegram Notifications
+
+                    <span
+                        class="telegram-badge"
+                        id="telegramStatus"
+                    >
+                        CONNECTING
+                    </span>
+                </h3>
+
+            </div>
+
+            <div class="alert-box">
+
+                <span class="icon">
+                    ✈️
+                </span>
+
+                <span
+                    class="msg"
+                    id="lastAlert"
+                >
+                    Waiting for VYROX alert...
+                </span>
+
+                <span
+                    class="time"
+                    id="alertTime"
+                >
+                    —
+                </span>
+
+            </div>
+
+            <div
+                style="
+                    margin-top:12px;
+                    display:flex;
+                    gap:12px;
+                    flex-wrap:wrap;
+                "
+            >
+
+                <button
+                    class="btn btn-telegram"
+                    id="testAlertBtn"
+                    type="button"
+                >
+                    <i data-lucide="send"></i>
+                    Send Test Alert
+                </button>
+
+                <button
+                    class="btn"
+                    id="telegramSetupBtn"
+                    type="button"
+                    style="
+                        border-color:var(--telegram-blue);
+                        color:var(--telegram-blue);
+                    "
+                >
+                    <i data-lucide="settings"></i>
+                    Bot Setup
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- BOT LOG -->
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>
+                    <i data-lucide="clipboard"></i>
+                    Bot Log
+                </h3>
+
+            </div>
+
+            <div id="botLog">
+                <div class="empty-state">
+                    Waiting for bot logs...
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+
+            <button
+                class="btn btn-primary"
+                id="refreshBtn"
+                type="button"
+            >
+                <i data-lucide="refresh-cw"></i>
+                Refresh
+            </button>
+
+            <button
+                class="btn btn-danger"
+                id="stopBotBtn"
+                type="button"
+            >
+                <i data-lucide="square"></i>
+                Stop Bot
+            </button>
+
+            <button
+                class="btn btn-success"
+                id="startBotBtn"
+                type="button"
+            >
+                <i data-lucide="play"></i>
+                Start Bot
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- STATIC ICON INITIALIZATION ONLY -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            const tg = window.Telegram?.WebApp;
+
+            if (tg) {
+                tg.ready();
+                tg.expand();
+            }
+        });
+    </script>
+
+    <!-- REAL DATA / TELEGRAM LOGIC -->
+    <script src="vyrox_dashboard_realtime.js"></script>
+
+</body>
+</html>
